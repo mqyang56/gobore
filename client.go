@@ -18,7 +18,7 @@ type Client struct {
 }
 
 func NewClient(localHost string, localPort uint16, to string, port uint16, secret string) (*Client, error) {
-	c := &Client{localHost: localHost, localPort: localPort, remotePort: port}
+	c := &Client{localHost: localHost, localPort: localPort, remotePort: port, to: to}
 	conn, err := net.Dial("tcp", fmt.Sprintf("%s:%d", to, controlPort))
 	if err != nil {
 		return nil, err

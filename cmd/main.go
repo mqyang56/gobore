@@ -1,6 +1,9 @@
 package main
 
 import (
+	"strconv"
+	"strings"
+
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 
@@ -18,6 +21,7 @@ var clientArgs struct {
 var serverArgs struct {
 	minPort uint16
 	secret  string
+	ports   string
 }
 
 func main() {
@@ -47,7 +51,19 @@ func main() {
 	var serverCmd = &cobra.Command{
 		Use: "server",
 		Run: func(cmd *cobra.Command, args []string) {
-			err := gobore.NewServer(serverArgs.minPort, serverArgs.secret).Listen()
+			var ports []uint16
+			s := strings.Split(serverArgs.ports, "-")
+			if len(s) == 2 {
+				start, _ := strconv.Atoi(s[0])
+				end, _ := strconv.Atoi(s[1])
+				if end > start && start > 0 {
+					for i := 0; i < end-start; i++ {
+						ports = append(ports, uint16(start+i))
+					}
+				}
+			}
+
+			err := gobore.NewServer(serverArgs.minPort, serverArgs.secret, ports).Listen()
 			if err != nil {
 				zap.L().Error("Failed to NewServer", zap.Error(err))
 				return
@@ -56,6 +72,7 @@ func main() {
 	}
 	serverCmd.Flags().Uint16Var(&serverArgs.minPort, "min-port", 1024, "Minimum TCP port number to accept")
 	serverCmd.Flags().StringVar(&serverArgs.secret, "secret", "", "Optional secret for authentication")
+	serverCmd.Flags().StringVar(&serverArgs.ports, "ports", "16002-16003", "Available ports on the server")
 
 	var rootCmd = &cobra.Command{}
 	rootCmd.AddCommand(clientCmd)

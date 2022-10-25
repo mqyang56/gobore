@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	controlPort = 7835
+	controlPort = 16001
 
 	timeout = 3 * time.Second
 )
